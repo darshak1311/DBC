@@ -1,7 +1,8 @@
-import { toPng } from 'html-to-image';
+// import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import * as QRCodeReact from 'qrcode.react';
 import React from 'react';
+
 
 export const exportToPNG = async (element: HTMLElement, filename: string) => {
   try {
