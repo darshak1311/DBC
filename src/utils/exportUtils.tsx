@@ -1,5 +1,5 @@
-// import { toPng } from 'html-to-image';
-// import jsPDF from 'jspdf';
+import { toPng } from 'html-to-image';
+import jsPDF from 'jspdf';
 import * as QRCodeReact from 'qrcode.react';
 import React from 'react';
 
