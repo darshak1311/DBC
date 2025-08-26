@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { CreditCard, Plus, Settings, LogOut, User } from 'lucide-react';
+import { CreditCard, Plus, Settings, LogOut, User, Edit } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
@@ -71,8 +73,11 @@ export const AdminDashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button className="w-full mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200">
-              Get Started
+            <button 
+              onClick={() => navigate('/businesscard/admin/edit')}
+              className="w-full mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+            >
+              Create Card
             </button>
           </div>
 
@@ -92,8 +97,11 @@ export const AdminDashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button className="w-full mt-4 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200">
-              View All
+            <button 
+              onClick={() => navigate('/businesscard/admin/edit')}
+              className="w-full mt-4 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+            >
+              Edit Card
             </button>
           </div>
 
