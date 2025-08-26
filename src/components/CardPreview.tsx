@@ -7,8 +7,9 @@ import {
   Linkedin, 
   Github, 
   Twitter,
-  MapPin,
-  Building
+  Facebook,
+  Youtube,
+  Camera
 } from 'lucide-react';
 import type { Database } from '../lib/supabase';
 
@@ -20,6 +21,7 @@ interface FormData {
   phone: string;
   email: string;
   website: string;
+  avatar_url: string;
   theme: {
     primary: string;
     secondary: string;
@@ -45,6 +47,8 @@ const SOCIAL_ICONS: Record<string, React.ComponentType<any>> = {
   LinkedIn: Linkedin,
   GitHub: Github,
   Twitter,
+  Facebook,
+  'You Tube': Youtube,
   Website: Globe,
 };
 
@@ -114,12 +118,24 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ formData, socialLinks 
             }}
           >
             {/* Avatar Placeholder */}
-            <div 
-              className="w-16 h-16 rounded-full mb-3 flex items-center justify-center text-white font-bold text-xl"
-              style={{ backgroundColor: formData.theme.primary }}
-            >
-              {formData.title ? formData.title.charAt(0).toUpperCase() : 'A'}
-            </div>
+            {formData.avatar_url ? (
+              <img
+                src={formData.avatar_url}
+                alt="Profile"
+                className="w-16 h-16 rounded-full object-cover mb-3 border-2"
+                style={{ borderColor: formData.theme.primary }}
+              />
+            ) : (
+              <div 
+                className="w-16 h-16 rounded-full mb-3 flex items-center justify-center text-white font-bold text-xl border-2"
+                style={{ 
+                  backgroundColor: formData.theme.primary,
+                  borderColor: formData.theme.secondary
+                }}
+              >
+                {formData.title ? formData.title.charAt(0).toUpperCase() : <Camera className="w-6 h-6" />}
+              </div>
+            )}
 
             {/* Name and Title */}
             <div className="mb-2">

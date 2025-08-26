@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { CardPreview } from './CardPreview';
 import { 
@@ -12,6 +13,8 @@ import {
   Github, 
   Twitter, 
   Globe,
+  Facebook,
+  Youtube,
   Palette,
   Type,
   Shapes,
@@ -20,7 +23,11 @@ import {
   Eye,
   EyeOff,
   Plus,
-  Trash2
+  Trash2,
+  Upload,
+  LogOut,
+  ExternalLink,
+  CreditCard
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../lib/supabase';
@@ -34,6 +41,7 @@ interface FormData {
   phone: string;
   email: string;
   website: string;
+  avatar_url: string;
   theme: {
     primary: string;
     secondary: string;
@@ -60,6 +68,8 @@ const SOCIAL_PLATFORMS = [
   { name: 'LinkedIn', icon: Linkedin, baseUrl: 'https://linkedin.com/in/' },
   { name: 'GitHub', icon: Github, baseUrl: 'https://github.com/' },
   { name: 'Twitter', icon: Twitter, baseUrl: 'https://twitter.com/' },
+  { name: 'Facebook', icon: Facebook, baseUrl: 'https://facebook.com/' },
+  { name: 'You Tube', icon: Youtube, baseUrl: 'https://youtube.com/@' },
   { name: 'Website', icon: Globe, baseUrl: 'https://' },
 ];
 
@@ -91,9 +101,11 @@ const LAYOUT_STYLES = [
 ];
 
 export const AdminPanel: React.FC = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [businessCard, setBusinessCard] = useState<BusinessCard | null>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [formData, setFormData] = useState<FormData>({
@@ -102,6 +114,7 @@ export const AdminPanel: React.FC = () => {
     phone: '',
     email: user?.email || '',
     website: '',
+    avatar_url: '',
     theme: {
       primary: '#3B82F6',
       secondary: '#1E40AF',
@@ -160,6 +173,7 @@ export const AdminPanel: React.FC = () => {
           phone: cardData.phone || '',
           email: cardData.email || user.email || '',
           website: cardData.website || '',
+          avatar_url: cardData.avatar_url || '',
           theme: cardData.theme as any || formData.theme,
           shape: cardData.shape || 'rectangle',
           layout: cardData.layout as any || formData.layout,
@@ -185,6 +199,41 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({
+        ...prev,
+        avatar_url: publicUrl
+      }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -283,6 +332,7 @@ export const AdminPanel: React.FC = () => {
         phone: formData.phone,
         email: formData.email,
         website: formData.website,
+        avatar_url: formData.avatar_url,
         theme: formData.theme,
         shape: formData.shape,
         layout: formData.layout,
@@ -318,6 +368,11 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  const viewPublicCard = () => {
+    if (businessCard && formData.is_published) {
+      window.open(`/c/${businessCard.id}`, '_blank');
+    }
+  };
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -335,8 +390,25 @@ export const AdminPanel: React.FC = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Business Card Editor</h1>
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
+                <CreditCard className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Business Card Editor</h1>
+                <p className="text-sm text-gray-500">Create and customize your digital business card</p>
+              </div>
+            </div>
             <div className="flex items-center gap-4">
+              {businessCard && formData.is_published && (
+                <button
+                  onClick={viewPublicCard}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Public Card
+                </button>
+              )}
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Published:</span>
                 <button
@@ -365,6 +437,13 @@ export const AdminPanel: React.FC = () => {
                 <Save className="w-4 h-4" />
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
+              <button
+                onClick={handleSignOut}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
@@ -382,6 +461,52 @@ export const AdminPanel: React.FC = () => {
                 Profile Information
               </h2>
               <div className="space-y-4">
+                {/* Profile Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profile Image
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {formData.avatar_url ? (
+                      <img
+                        src={formData.avatar_url}
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                        <Camera className="w-6 h-6 text-gray-400" />
+                      </div>
+                    )}
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="avatar-upload"
+                        disabled={uploading}
+                      />
+                      <label
+                        htmlFor="avatar-upload"
+                        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors ${
+                          uploading ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <Upload className="w-4 h-4" />
+                        {uploading ? 'Uploading...' : 'Upload Image'}
+                      </label>
+                      {formData.avatar_url && (
+                        <button
+                          onClick={() => handleInputChange('avatar_url', '')}
+                          className="ml-2 text-sm text-red-600 hover:text-red-800"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Full Name
@@ -477,7 +602,8 @@ export const AdminPanel: React.FC = () => {
 
               {/* Add New Social Link */}
               <div className="border-t border-gray-200 pt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <select
                     value={newSocialLink.platform}
                     onChange={(e) => handleSocialLinkChange('platform', e.target.value)}
@@ -496,15 +622,22 @@ export const AdminPanel: React.FC = () => {
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Username"
                   />
+                  </div>
+                  <input
+                    type="url"
+                    value={newSocialLink.url}
+                    onChange={(e) => handleSocialLinkChange('url', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Full URL (auto-generated)"
+                  />
                   <button
                     onClick={addSocialLink}
-                    disabled={!newSocialLink.username}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    disabled={!newSocialLink.username || !newSocialLink.url}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Add
                   </button>
-                </div>
               </div>
             </div>
 

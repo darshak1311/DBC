@@ -55,6 +55,7 @@ export interface Database {
           phone: string | null
           email: string | null
           website: string | null
+          avatar_url: string | null
           theme: Json | null
           shape: string
           layout: Json | null
@@ -70,6 +71,7 @@ export interface Database {
           phone?: string | null
           email?: string | null
           website?: string | null
+          avatar_url?: string | null
           theme?: Json | null
           shape?: string
           layout?: Json | null
@@ -85,6 +87,7 @@ export interface Database {
           phone?: string | null
           email?: string | null
           website?: string | null
+          avatar_url?: string | null
           theme?: Json | null
           shape?: string
           layout?: Json | null

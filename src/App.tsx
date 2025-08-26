@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthPage } from './components/AuthPage';
-import { AdminDashboard } from './components/AdminDashboard';
 import { AdminPanel } from './components/AdminPanel';
+import { PublicCard } from './components/PublicCard';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 
@@ -13,7 +13,7 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     if (!loading && user && location.pathname === '/') {
-      navigate('/businesscard/admin');
+      navigate('/admin');
     }
   }, [user, loading, location.pathname, navigate]);
 
@@ -33,31 +33,24 @@ const AppContent: React.FC = () => {
       <Route 
         path="/" 
         element={
-          user ? <Navigate to="/businesscard/admin" replace /> : <Navigate to="/auth" replace />
+          user ? <Navigate to="/admin" replace /> : <Navigate to="/auth" replace />
         } 
       />
       <Route 
         path="/auth" 
         element={
-          user ? <Navigate to="/businesscard/admin" replace /> : <AuthPage />
+          user ? <Navigate to="/admin" replace /> : <AuthPage />
         } 
       />
       <Route
-        path="/businesscard/admin"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/businesscard/admin/edit"
+        path="/admin"
         element={
           <ProtectedRoute>
             <AdminPanel />
           </ProtectedRoute>
         }
       />
+      <Route path="/c/:cardId" element={<PublicCard />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
