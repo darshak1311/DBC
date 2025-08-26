@@ -586,7 +586,7 @@ export const AdminPanel: React.FC = () => {
               </div>
 
               {/* Design Settings */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Design Settings</h3>
                 <div className="space-y-4">
                   <div>
@@ -664,7 +664,7 @@ export const AdminPanel: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Social Links */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -769,7 +769,90 @@ export const AdminPanel: React.FC = () => {
             {/* Preview */}
             <div className="lg:sticky lg:top-8">
               <CardPreview formData={formData} socialLinks={socialLinks} />
+              <div className="mt-6">
+                {/* Design Settings */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Design Settings</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {THEME_PRESETS.map((theme) => (
+                        <button
+                          key={theme.name}
+                          onClick={() => setFormData({ ...formData, theme })}
+                          className={`p-3 rounded-lg border-2 transition-all ${
+                            formData.theme.name === theme.name
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <div
+                              className="w-4 h-4 rounded-full"
+                              style={{ backgroundColor: theme.primary }}
+                            />
+                            <div
+                              className="w-4 h-4 rounded-full"
+                              style={{ backgroundColor: theme.secondary }}
+                            />
+                          </div>
+                          <div className="text-xs font-medium text-gray-900">{theme.name}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Shape</label>
+                      <select
+                        value={formData.shape}
+                        onChange={(e) => setFormData({ ...formData, shape: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="rectangle">Rectangle</option>
+                        <option value="rounded">Rounded</option>
+                        <option value="circle">Circle</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Style</label>
+                      <select
+                        value={formData.layout.style}
+                        onChange={(e) => setFormData({ 
+                          ...formData, 
+                          layout: { ...formData.layout, style: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="modern">Modern</option>
+                        <option value="classic">Classic</option>
+                        <option value="minimal">Minimal</option>
+                        <option value="creative">Creative</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Font</label>
+                      <select
+                        value={formData.layout.font}
+                        onChange={(e) => setFormData({ 
+                          ...formData, 
+                          layout: { ...formData.layout, font: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        {FONT_OPTIONS.map(font => (
+                          <option key={font} value={font}>{font}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </div>
             </div>
+            
           </div>
         )}
 
