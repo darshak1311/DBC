@@ -1,6 +1,6 @@
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
-import QRCode from 'qrcode.react';
+import * as QRCodeReact from 'qrcode.react';
 import React from 'react';
 
 export const exportToPNG = async (element: HTMLElement, filename: string) => {
@@ -50,7 +50,7 @@ export const exportToPDF = async (element: HTMLElement, filename: string) => {
 
 export const generateQRCode = (url: string) => {
   return (
-    <QRCode
+    <QRCodeReact.QRCode
       value={url}
       size={200}
       level="M"
